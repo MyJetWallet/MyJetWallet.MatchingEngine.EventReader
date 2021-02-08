@@ -26,8 +26,8 @@ jobs:
       run: dotnet test --no-build --configuration Release
 
     - name: Create the package
-      run: dotnet pack --configuration Release src/MyJetWallet.Sdk.RabbitBatchReader /p:Version=${GITHUB_REF#refs/tags/}
+      run: dotnet pack --configuration Release srcMyJetWallet.MatchingEngine.EventReader /p:Version=${GITHUB_REF#refs/tags/}
 
     - name: Publish the package to GPR
-      run: dotnet nuget push src/MyJetWallet.Sdk.RabbitBatchReader/bin/Release/*.nupkg -s "https://api.nuget.org/v3/index.json" -k ${{ secrets.NUGET_TOCKEN }}
+      run: dotnet nuget push src/MyJetWallet.MatchingEngine.EventReader/bin/Release/*.nupkg -s "https://api.nuget.org/v3/index.json" -k ${{ secrets.NUGET_TOCKEN }}
 
