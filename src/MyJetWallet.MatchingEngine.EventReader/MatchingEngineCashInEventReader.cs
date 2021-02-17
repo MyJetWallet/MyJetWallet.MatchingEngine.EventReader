@@ -29,7 +29,7 @@ namespace MyJetWallet.MatchingEngine.EventReader
         protected override string ExchangeName { get; }
         protected override string QueueName { get; }
         protected override bool IsQueueAutoDelete { get; }
-        protected override string[] RoutingKeys { get; } = { MessageType.CashIn.ToString() };
+        protected override string[] RoutingKeys { get; } = { ((int)MessageType.CashIn).ToString() };
 
         protected override async Task ProcessBatch(IList<CustomQueueItem<CashInEvent>> batch)
         {
