@@ -1,43 +1,23 @@
 ﻿syntax = "proto3";
 
-package com.swisschain.grpc.messages.outgoing;
+package com.lykke.matching.engine.messages.outgoing;
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/any.proto";
-import "google/protobuf/wrappers.proto";
 
-option java_package = "com.swisschain.matching.engine.messages.outgoing";
+option java_package = "com.lykke.matching.engine.messages.outgoing";
 option java_outer_classname = "OutgoingMessages";
-
-option csharp_namespace = "MyJetWallet.MatchinEngine.Events.Models";
-
-service GrpOutgoingEventsService {
-    rpc publishEvents(MessageWrapper) returns (PublishRequestResult){};
-}
-
-message MessageWrapper {
-    int32 messageType = 1;
-    google.protobuf.Any message = 2;
-}
-
-message PublishRequestResult {
-    bool published = 1;
-    google.protobuf.StringValue reason = 2;
-}
-
-enum MessageType {
-    UNKNOWN_MESSAGE_TYPE = 0;
-    CASH_IN = 1;
-    CASH_OUT = 2;
-    CASH_TRANSFER = 3;
-    ORDER = 4;
-    RESERVED_BALANCE_UPDATE = 5;
-    ORDER_BOOK_SNAPSHOT = 6;
-}
+option csharp_namespace = "ME.Contracts.OutgoingMessages";
 
 message Header {
+    enum MessageType {
+        UNKNOWN_MESSAGE_TYPE = 0;
+        CASH_IN = 1;
+        CASH_OUT = 2;
+        CASH_TRANSFER = 3;
+        ORDER = 4;
+    }
     int32 messageType = 1;
-
+    
     int64 sequenceNumber = 2;
     string messageId = 3;
     string requestId = 4;
@@ -47,14 +27,15 @@ message Header {
 }
 
 message BalanceUpdate {
-    string brokerId = 1;
-    uint64 accountId = 2;
-    uint64 walletId = 3;
-    string assetId = 4;
-    string oldBalance = 5;
-    string newBalance = 6;
-    string oldReserved = 7;
-    string newReserved = 8;
+    string walletId = 1;
+    string assetId = 2;
+    string oldBalance = 3;
+    string newBalance = 4;
+    string oldReserved = 5;
+    string newReserved = 6;
+    string brokerId = 7;
+    string accountId = 8;
+    uint64 walletVersion = 9;
 }
 
 message Fee {
@@ -69,47 +50,43 @@ message FeeInstruction {
         EXTERNAL_FEE = 2;
     }
     int32 type = 1;
-
+   
     string size = 2;
-
+   
     enum FeeSizeType {
         UNKNOWN_FEE_SIZE_TYPE = 0;
         PERCENTAGE = 1;
         ABSOLUTE = 2;
     }
     int32 sizeType = 3;
-
+   
     string makerSize = 4;
     int32 makerSizeType = 5;
-    uint64 sourceAccountId = 6;
-    uint64 sourceWalletId = 7;
-    uint64 targetAccountId = 8;
-    uint64 targetWalletId = 9;
-    repeated string assetsIds = 10;
-    string makerFeeModificator = 11;
-    int32 index = 12;
+    string sourceWalletId = 6;
+    string targetWalletId = 7;
+    repeated string assetsIds = 8;
+    string makerFeeModificator = 9;
+    int32 index = 10;
 }
 
 message FeeTransfer {
     string volume = 1;
-    uint64 sourceAccountId = 2;
-    uint64 sourceWalletId = 3;
-    uint64 targetAccountId = 4;
-    uint64 targetWalletId = 5;
-    string assetId = 6;
-    string feeCoef = 7;
-    int32 index = 8;
+    string sourceWalletId = 2;
+    string targetWalletId = 3;
+    string assetId = 4;
+    string FeeCoef = 5;
+    int32 index = 6;
 }
 
 message CashInEvent {
     message CashIn {
-        string brokerId = 1;
-        uint64 accountId = 2;
-        uint64 walletId = 3;
-        string assetId = 4;
-        string volume = 5;
-        repeated Fee fees = 6;
-        string description = 7;
+        string walletId = 1;
+        string assetId = 2;
+        string volume = 3;
+        repeated Fee fees = 4;
+        string brokerId = 5;
+        string accountId = 6;
+        uint64 walletVersion = 7;
     }
     Header header = 1;
     repeated BalanceUpdate balanceUpdates = 2;
@@ -118,13 +95,13 @@ message CashInEvent {
 
 message CashOutEvent {
     message CashOut {
-        string brokerId = 1;
-        uint64 accountId = 2;
-        uint64 walletId = 3;
-        string assetId = 4;
-        string volume = 5;
-        repeated Fee fees = 6;
-        string description = 7;
+        string walletId = 1;
+        string assetId = 2;
+        string volume = 3;
+        repeated Fee fees = 4;
+        string brokerId = 5;
+        string accountId = 6;
+        uint64 walletVersion = 7;
     }
     Header header = 1;
     repeated BalanceUpdate balanceUpdates = 2;
@@ -133,15 +110,15 @@ message CashOutEvent {
 
 message CashTransferEvent {
     message CashTransfer {
-        string brokerId = 1;
-        uint64 accountId = 2;
-        uint64 fromWalletId = 3;
-        uint64 toWalletId = 4;
-        string volume = 5;
-        string overdraftLimit = 6;
-        string assetId = 7;
-        repeated Fee fees = 8;
-        string description = 9;
+        string fromWalletId = 1;
+        string toWalletId = 2;
+        string volume = 3;
+        string overdraftLimit = 4;
+        string assetId = 5;
+        repeated Fee fees = 6;
+        string brokerId = 7;
+        string accountId = 8;
+        uint64 walletVersion = 9;
     }
     Header header = 1;
     repeated BalanceUpdate balanceUpdates = 2;
@@ -158,7 +135,7 @@ message ExecutionEvent {
             google.protobuf.Timestamp timestamp = 5;
             string oppositeOrderId = 6;
             string oppositeExternalOrderId = 7;
-            uint64 oppositeWalletId = 8;
+            string oppositeWalletId = 8;
             string quotingAssetId = 9;
             string quotingVolume = 10;
             int32 index = 11;
@@ -173,9 +150,8 @@ message ExecutionEvent {
             int32 role = 14;
 
             repeated FeeTransfer fees = 15;
-            TradeStatus status = 16;
         }
-
+       
         enum OrderType {
             UNKNOWN_ORDER_TYPE = 0;
             MARKET = 1;
@@ -183,23 +159,23 @@ message ExecutionEvent {
             STOP_LIMIT = 3;
         }
         int32 orderType = 1;
-
+        
         string id = 2;
         string externalId = 3;
         string assetPairId = 4;
-        uint64 walletId = 5;
-
+        string walletId = 5;
+     
         enum OrderSide {
             UNKNOWN_ORDER_SIDE = 0;
             BUY = 1;
             SELL = 2;
         }
         int32 side = 6;
-
+        
         string volume = 7;
         string remainingVolume = 8;
         string price = 9;
-
+        
         enum OrderStatus {
             UNKNOWN_STATUS = 0;
             PLACED = 1;
@@ -227,73 +203,37 @@ message ExecutionEvent {
         repeated Trade trades = 22;
 
         enum OrderTimeInForce {
-            UNKNOWN_ORDER_TIME_IN_FORCE = 0;
-            GTC = 1;
-            GTD = 2;
-            IOC = 3;
-            FOK = 4;
+             UNKNOWN_ORDER_TIME_IN_FORCE = 0;
+             GTC = 1;
+             GTD = 2;
+             IOC = 3;
+             FOK = 4;
         }
         int32 timeInForce = 23;
         google.protobuf.Timestamp expiryTime = 24;
         string parentExternalId = 25;
         string childExternalId = 26;
         string brokerId = 27;
-        uint64 accountId = 28;
+        string accountId = 28;
+        uint64 walletVersion = 29;
     }
     Header header = 1;
     repeated BalanceUpdate balanceUpdates = 2;
     repeated Order orders = 3;
 }
 
-enum TradeStatus {
-    UNKNOWN_STATUS = 0;
-    PENDING = 1;
-    CONFIRMED = 2;
-    REJECTED = 3;
-}
-
-message TradeResponse {
-    string traderId = 1;
-    TradeStatus status = 2;
-    string statusReason = 3;
-    google.protobuf.Timestamp timestamp = 4;
-}
-
-message ReservedBalanceUpdateEvent {
-    message ReservedBalanceUpdate {
-        string brokerId = 1;
-        uint64 accountId = 2;
-        uint64 walletId = 3;
-        string assetId = 4;
-        string volume = 5;
-        string description = 6;
-    }
-    Header header = 1;
-    repeated BalanceUpdate balanceUpdates = 2;
-    ReservedBalanceUpdate reservedBalanceUpdate = 3;
-}
-
-message OrderBookSnapshotEvent {
-    Header header = 1;
-    OrderBookSnapshot orderBook = 2;
-}
-
-message OrderBookSnapshotRequest {
-    string brokerId = 1;
-}
-
 message OrderBookSnapshot {
-    string asset = 1;
-    bool isBuy = 2;
-    google.protobuf.Timestamp timestamp = 3;
+  string asset = 1;
+  bool isBuy = 2;
+  google.protobuf.Timestamp timestamp = 3;
 
-    message OrderBookLevel {
-        string price = 1;
-        string volume = 2;
-        uint64 walletId = 3;
-        string orderId = 4;
-    }
+  message OrderBookLevel {
+    string price = 1;
+    string volume = 2;
+    string walletId = 3;
+    string orderId = 4;
+  }
 
-    repeated OrderBookLevel levels = 4;
-    string brokerId = 5;
+  repeated OrderBookLevel levels = 4;
+  string brokerId = 5;
 }
