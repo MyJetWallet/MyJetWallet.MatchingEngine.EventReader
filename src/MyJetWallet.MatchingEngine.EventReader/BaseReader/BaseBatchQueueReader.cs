@@ -27,6 +27,7 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
         protected abstract string ExchangeName { get; }
         protected abstract string QueueName { get; }
         protected abstract string[] RoutingKeys { get; }
+        protected abstract bool IsQueueAutoDelete { get; }
         protected abstract Task ProcessBatch(IList<CustomQueueItem<T>> batch);
         protected abstract void LogQueue();
         protected abstract T DeserializeMessage(ReadOnlyMemory<byte> body);
@@ -119,7 +120,7 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
             {
                 channel.BasicQos(0, (ushort)_prefetchCount, false);
 
-                channel.QueueDeclare(QueueName, true, false, false);
+                channel.QueueDeclare(QueueName, true, false, IsQueueAutoDelete);
 
                 if (RoutingKeys.Any())
                 {

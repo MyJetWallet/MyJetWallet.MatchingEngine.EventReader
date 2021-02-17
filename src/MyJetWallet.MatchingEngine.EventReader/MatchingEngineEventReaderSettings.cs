@@ -14,5 +14,7 @@
         public int PrefetchCount { get; set; } = 500;
         public int BatchCount { get; set; } = 100;
         public string TopicName { get; set; } = "ME";
+
+        public bool IsQueueAutoDelete { get; set; } = false;
     }
 }

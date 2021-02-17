@@ -22,10 +22,12 @@ namespace MyJetWallet.MatchingEngine.EventReader
             _subscribers = subscribers;
             ExchangeName = settings.TopicName;
             QueueName = settings.QueryName;
+            IsQueueAutoDelete = settings.IsQueueAutoDelete;
         }
 
         protected override string ExchangeName { get; }
         protected override string QueueName { get; }
+        protected override bool IsQueueAutoDelete { get; }
         protected override string[] RoutingKeys { get; } = { MessageType.Order.ToString() };
 
         protected override async Task ProcessBatch(IList<CustomQueueItem<ExecutionEvent>> batch)

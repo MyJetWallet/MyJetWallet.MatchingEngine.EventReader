@@ -87,6 +87,7 @@ namespace Testwriter
 
         protected override string ExchangeName { get; } = "alex";
         protected override string QueueName { get; } = "alex-test";
+        protected override bool IsQueueAutoDelete { get; } = true;
         protected override string[] RoutingKeys { get; } = {};
 
         protected override async Task ProcessBatch(IList<CustomQueueItem<string>> batch)
