@@ -78,6 +78,17 @@ message FeeTransfer {
     int32 index = 6;
 }
 
+
+message MeEvent {
+	Header header = 1;
+	repeated BalanceUpdate balanceUpdates = 2;
+	CashInEvent.CashIn cashIn = 3;
+	CashOutEvent.CashOut cashOut = 4;
+	CashTransferEvent.CashTransfer cashTransfer = 5;
+	repeated ExecutionEvent.Order orders = 6;
+}
+
+
 message CashInEvent {
     message CashIn {
         string walletId = 1;

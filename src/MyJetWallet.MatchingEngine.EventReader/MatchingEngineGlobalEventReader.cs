@@ -8,14 +8,14 @@ using MyJetWallet.MatchingEngine.EventReader.BaseReader;
 
 namespace MyJetWallet.MatchingEngine.EventReader
 {
-    public class MatchingEngineGlobalEventReader : BaseBatchQueueReader<object>
+    public class MatchingEngineGlobalEventReader : BaseBatchQueueReader<MeEvent>
     {
         private readonly ILogger<MatchingEngineGlobalEventReader> _logger;
-        private readonly IMatchingEngineSubscriber<object>[] _subscribers;
+        private readonly IMatchingEngineSubscriber<MeEvent>[] _subscribers;
 
         public MatchingEngineGlobalEventReader(
             MatchingEngineEventReaderSettings settings,
-            IMatchingEngineSubscriber<object>[] subscribers,
+            IMatchingEngineSubscriber<MeEvent>[] subscribers,
             ILogger<MatchingEngineGlobalEventReader> logger)
             : base(settings.RabbitMqConnectionString, settings.PrefetchCount, settings.BatchCount, logger)
         {
@@ -33,7 +33,7 @@ namespace MyJetWallet.MatchingEngine.EventReader
         protected override bool IsQueueAutoDelete { get; }
         protected override string[] RoutingKeys { get; }
 
-        protected override async Task ProcessBatch(IList<CustomQueueItem<object>> batch)
+        protected override async Task ProcessBatch(IList<CustomQueueItem<MeEvent>> batch)
         {
             foreach (var subs in _subscribers)
             {
@@ -43,7 +43,7 @@ namespace MyJetWallet.MatchingEngine.EventReader
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, $"Subscriber {subs.GetType().Name} cannot handle CashInEvent's'");
+                    _logger.LogError(e, $"Subscriber {subs.GetType().Name} cannot handle MeEvent's");
                     throw;
                 }
             }
@@ -53,30 +53,50 @@ namespace MyJetWallet.MatchingEngine.EventReader
         {
         }
 
-        protected override object DeserializeMessage(ReadOnlyMemory<byte> body, string routingKey)
+        protected override MeEvent DeserializeMessage(ReadOnlyMemory<byte> body, string routingKey)
         {
             if (routingKey == ((int)Header.Types.MessageType.CashIn).ToString())
             {
                 var item = CashInEvent.Parser.ParseFrom(body.ToArray());
-                return item;
+                return new MeEvent()
+                {
+                    Header = item.Header,
+                    BalanceUpdates = {item.BalanceUpdates},
+                    CashIn = item.CashIn
+                };
             }
 
             if (routingKey == ((int)Header.Types.MessageType.CashOut).ToString())
             {
                 var item = CashOutEvent.Parser.ParseFrom(body.ToArray());
-                return item;
+                return new MeEvent()
+                {
+                    Header = item.Header,
+                    BalanceUpdates = { item.BalanceUpdates },
+                    CashOut = item.CashOut
+                };
             }
 
             if (routingKey == ((int)Header.Types.MessageType.CashTransfer).ToString())
             {
                 var item = CashTransferEvent.Parser.ParseFrom(body.ToArray());
-                return item;
+                return new MeEvent()
+                {
+                    Header = item.Header,
+                    BalanceUpdates = { item.BalanceUpdates },
+                    CashTransfer = item.CashTransfer
+                };
             }
 
             if (routingKey == ((int)Header.Types.MessageType.Order).ToString())
             {
                 var item = ExecutionEvent.Parser.ParseFrom(body.ToArray());
-                return item;
+                return new MeEvent()
+                {
+                    Header = item.Header,
+                    BalanceUpdates = { item.BalanceUpdates },
+                    Orders = { item.Orders }
+                };
             }
 
             Console.WriteLine($"Receive unknown event from ME: {routingKey}. Message will skipped");
