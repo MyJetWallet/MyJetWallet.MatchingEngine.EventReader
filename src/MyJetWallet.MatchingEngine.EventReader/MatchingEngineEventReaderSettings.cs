@@ -1,4 +1,7 @@
-﻿namespace MyJetWallet.MatchingEngine.EventReader
+﻿using System.Collections.Generic;
+using ME.Contracts.OutgoingMessages;
+
+namespace MyJetWallet.MatchingEngine.EventReader
 {
     public class MatchingEngineEventReaderSettings
     {
@@ -10,6 +13,8 @@
 
         public string RabbitMqConnectionString { get; set; }
         public string QueryName { get; set; }
+
+        public List<Header.Types.MessageType> MessageTypes { get; set; }
 
         public int PrefetchCount { get; set; } = 500;
         public int BatchCount { get; set; } = 100;

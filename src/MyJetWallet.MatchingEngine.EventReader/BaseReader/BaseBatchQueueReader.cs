@@ -30,7 +30,7 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
         protected abstract bool IsQueueAutoDelete { get; }
         protected abstract Task ProcessBatch(IList<CustomQueueItem<T>> batch);
         protected abstract void LogQueue();
-        protected abstract T DeserializeMessage(ReadOnlyMemory<byte> body);
+        protected abstract T DeserializeMessage(ReadOnlyMemory<byte> body, string routingKey);
 
 
         protected EventHandler<BasicDeliverEventArgs> CreateOnMessageReceivedEventHandler(IModel channel)
@@ -39,9 +39,12 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
             {
                 try
                 {
-                    T message = DeserializeMessage(basicDeliverEventArgs.Body);
+                    T message = DeserializeMessage(basicDeliverEventArgs.Body, basicDeliverEventArgs.RoutingKey);
 
-                    Queue.Enqueue(new CustomQueueItem<T>(message, basicDeliverEventArgs.DeliveryTag, channel));
+                    if (message != null)
+                    {
+                        Queue.Enqueue(new CustomQueueItem<T>(message, basicDeliverEventArgs.DeliveryTag, channel));
+                    }
                 }
                 catch (Exception e)
                 {

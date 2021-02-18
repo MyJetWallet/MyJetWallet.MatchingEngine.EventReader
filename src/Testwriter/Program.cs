@@ -106,7 +106,7 @@ namespace Testwriter
         {
         }
 
-        protected override string DeserializeMessage(ReadOnlyMemory<byte> body)
+        protected override string DeserializeMessage(ReadOnlyMemory<byte> body, string routingKey)
         {
             return Encoding.UTF8.GetString(body.ToArray());
         }
