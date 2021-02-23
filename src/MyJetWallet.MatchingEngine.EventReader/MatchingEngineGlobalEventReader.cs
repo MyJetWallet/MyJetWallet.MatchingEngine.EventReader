@@ -25,7 +25,7 @@ namespace MyJetWallet.MatchingEngine.EventReader
             QueueName = settings.QueryName;
             IsQueueAutoDelete = settings.IsQueueAutoDelete;
 
-            RoutingKeys = settings.MessageTypes.Select(e => ((int) e).ToString()).ToArray();
+            RoutingKeys = new string[] { };
         }
 
         protected override string ExchangeName { get; }
