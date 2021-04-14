@@ -12,7 +12,7 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
 {
     public abstract class BaseBatchQueueReader<T>
     {
-        private readonly TimeSpan _reconnectTimeoutSeconds = TimeSpan.FromSeconds(30);
+        private readonly TimeSpan _reconnectTimeoutSeconds = TimeSpan.FromSeconds(10);
         private readonly TimeSpan _timeoutBeforeStop = TimeSpan.FromSeconds(10);
 
         private readonly string _connectionString;
