@@ -4,8 +4,8 @@
     <TargetFramework>net5.0</TargetFramework>
     <OutputType>Library</OutputType>
     <IsPackable>true</IsPackable>
-    <PackageProjectUrl>https://github.com/MyJetWallet/MyJetWallet.Sdk.RabbitBatchReader</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MyJetWallet/MyJetWallet.Sdk.RabbitBatchReader</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/MyJetWallet/MyJetWallet.MatchingEngine.EventReader</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MyJetWallet/MyJetWallet.MatchingEngine.EventReader</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
