@@ -199,6 +199,11 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
                             foreach (var item in list)
                                 item.Accept();
                     }
+
+                    if (exceptionThrowed)
+                    {
+                        connection.Close();
+                    }
                 }
                 catch (Exception e)
                 {
