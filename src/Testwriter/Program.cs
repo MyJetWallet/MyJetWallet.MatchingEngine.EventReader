@@ -102,10 +102,6 @@ namespace Testwriter
             await Task.Delay(1000);
         }
 
-        protected override void LogQueue()
-        {
-        }
-
         protected override string DeserializeMessage(ReadOnlyMemory<byte> body, string routingKey)
         {
             return Encoding.UTF8.GetString(body.ToArray());

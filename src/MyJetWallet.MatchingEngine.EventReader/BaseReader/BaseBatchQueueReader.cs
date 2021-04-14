@@ -21,6 +21,7 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
         private readonly ILogger<BaseBatchQueueReader<T>> _logger;
         private CancellationTokenSource _cancellationTokenSource;
         private Task _queueReaderTask;
+        private bool _isActive = false;
 
         //protected ConcurrentQueue<CustomQueueItem<T>> Queue;
         protected List<CustomQueueItem<T>> Data;
@@ -119,6 +120,12 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
 
         private async Task StartQueueReader()
         {
+            lock (_sync)
+            {
+                Data = new List<CustomQueueItem<T>>();
+                _isActive = true;
+            }
+
             var factory = new ConnectionFactory
             {
                 Uri = new Uri(_connectionString)
@@ -169,7 +176,7 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
                         List<CustomQueueItem<T>> list = null;
                         lock (_sync)
                         {
-                            if (Data.Count > 0)
+                            if (_isActive && Data.Count > 0)
                             {
                                 list = Data;
                                 Data = new List<CustomQueueItem<T>>();
@@ -192,7 +199,10 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
                     }
                     catch (Exception e)
                     {
+                        lock (_sync) _isActive = false;
+
                         connection.Close();
+                        
                         _logger.LogError(e, "Error processing batch");
                     }
                 }

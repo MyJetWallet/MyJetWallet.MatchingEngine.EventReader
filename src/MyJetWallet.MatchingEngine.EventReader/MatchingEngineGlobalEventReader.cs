@@ -49,10 +49,6 @@ namespace MyJetWallet.MatchingEngine.EventReader
             }
         }
 
-        protected override void LogQueue()
-        {
-        }
-
         protected override OutgoingEvent DeserializeMessage(ReadOnlyMemory<byte> body, string routingKey)
         {
             try
