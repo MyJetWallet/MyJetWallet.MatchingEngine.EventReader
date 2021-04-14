@@ -22,14 +22,15 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
         private CancellationTokenSource _cancellationTokenSource;
         private Task _queueReaderTask;
 
-        protected ConcurrentQueue<CustomQueueItem<T>> Queue;
+        //protected ConcurrentQueue<CustomQueueItem<T>> Queue;
+        protected List<CustomQueueItem<T>> Data;
+        protected object _sync = new object();
 
         protected abstract string ExchangeName { get; }
         protected abstract string QueueName { get; }
         protected abstract string[] RoutingKeys { get; }
         protected abstract bool IsQueueAutoDelete { get; }
         protected abstract Task ProcessBatch(IList<CustomQueueItem<T>> batch);
-        protected abstract void LogQueue();
         protected abstract T DeserializeMessage(ReadOnlyMemory<byte> body, string routingKey);
 
 
@@ -43,7 +44,10 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
 
                     if (message != null)
                     {
-                        Queue.Enqueue(new CustomQueueItem<T>(message, basicDeliverEventArgs.DeliveryTag, channel));
+                        lock (_sync)
+                        {
+                            Data.Add(new CustomQueueItem<T>(message, basicDeliverEventArgs.DeliveryTag, channel));
+                        }
                     }
                 }
                 catch (Exception e)
@@ -72,7 +76,9 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
         public void Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
-            Queue = new ConcurrentQueue<CustomQueueItem<T>>();
+            
+            lock(_sync) Data = new List<CustomQueueItem<T>>();
+            
             _queueReaderTask = StartRabbitSessionWithReconnects();
         }
 
@@ -149,60 +155,45 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
 
                 channel.BasicCancel(tag);
                 connection.Close();
-
-                if (Queue.Count > 0)
-                {
-                    _logger.LogWarning("Queue is not empty on shutdown!");
-                    LogQueue();
-                }
-
-                Queue.Clear();
             }
         }
 
         private async Task StartHandler(IConnection connection)
         {
-            while ((!_cancellationTokenSource.IsCancellationRequested || Queue.Count > 0) && connection.IsOpen)
+            while ((!_cancellationTokenSource.IsCancellationRequested) && connection.IsOpen)
             {
-                var isFullBatch = false;
                 try
                 {
-                    var exceptionThrowed = false;
-                    var list = new List<CustomQueueItem<T>>();
                     try
                     {
-                        for (var i = 0; i < _batchCount; i++)
-                            if (Queue.TryDequeue(out var customQueueItem))
-                                list.Add(customQueueItem);
-                            else
-                                break;
-
-                        if (list.Count > 0)
+                        List<CustomQueueItem<T>> list = null;
+                        lock (_sync)
                         {
-                            isFullBatch = list.Count == _batchCount;
+                            if (Data.Count > 0)
+                            {
+                                list = Data;
+                                Data = new List<CustomQueueItem<T>>();
+                            }
+                        }
 
-                            await ProcessBatch(list);
+                        if (list != null)
+                        {
+                            var index = 0;
+                            while (index < list.Count)
+                            {
+                                var batch = list.Skip(index).Take(_batchCount).ToList();
+                                await ProcessBatch(batch);
+                                index += batch.Count;
+                            }
+
+                            foreach (var item in list)
+                                item.Accept();
                         }
                     }
                     catch (Exception e)
                     {
-                        exceptionThrowed = true;
-
-                        _logger.LogError(e, "Error processing batch");
-
-                        foreach (var item in list)
-                            item.Reject();
-                    }
-                    finally
-                    {
-                        if (!exceptionThrowed)
-                            foreach (var item in list)
-                                item.Accept();
-                    }
-
-                    if (exceptionThrowed)
-                    {
                         connection.Close();
+                        _logger.LogError(e, "Error processing batch");
                     }
                 }
                 catch (Exception e)
@@ -211,7 +202,7 @@ namespace MyJetWallet.MatchingEngine.EventReader.BaseReader
                 }
                 finally
                 {
-                    await Task.Delay(isFullBatch ? 1 : 1000);
+                    await Task.Delay(5);
                 }
             }
         }
