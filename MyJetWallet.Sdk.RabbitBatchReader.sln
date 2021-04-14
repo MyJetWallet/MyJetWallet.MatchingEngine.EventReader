@@ -3,13 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testwriter", "src\Testwriter\Testwriter.csproj", "{4CF3C3DB-5BA8-42F4-B44A-F4BD37042068}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testwriter", "src\Testwriter\Testwriter.csproj", "{4CF3C3DB-5BA8-42F4-B44A-F4BD37042068}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyJetWallet.MatchingEngine.EventReader", "src\MyJetWallet.MatchingEngine.EventReader\MyJetWallet.MatchingEngine.EventReader.csproj", "{60D7081A-88DF-48E3-B079-E9FC6AF0D38D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyJetWallet.MatchingEngine.EventReader", "src\MyJetWallet.MatchingEngine.EventReader\MyJetWallet.MatchingEngine.EventReader.csproj", "{60D7081A-88DF-48E3-B079-E9FC6AF0D38D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{37907610-48BB-47E9-9E0C-8DF2AB45D179}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci-test.yml = .github\workflows\ci-test.yml
+		.github\workflows\notify_errors.yaml = .github\workflows\notify_errors.yaml
 		README.md = README.md
+		.github\workflows\release-api-client.yml = .github\workflows\release-api-client.yml
+		.github\workflows\update_nuget.yaml = .github\workflows\update_nuget.yaml
 	EndProjectSection
 EndProject
 Global
